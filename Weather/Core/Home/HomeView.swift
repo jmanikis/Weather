@@ -7,18 +7,24 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct HomeView: View {
+    @State private var searchText: String = ""
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            SearchBarView(searchText: $searchText) {}
+            Group {
+                VStack {
+                    Text("No City Selected")
+                    Text("Please search for a city")
+                }
+            }
+            .frame(maxHeight: .infinity, alignment: .center)
         }
         .padding()
     }
 }
 
 #Preview {
-    ContentView()
+    HomeView()
 }
