@@ -12,7 +12,7 @@ class HomeViewModel: ObservableObject {
     let weatherManager = WeatherManager()
     let storageManager = StorageManager()
     
-    @Published private(set) var viewState: WeatherViewState = .empty
+    @Published private(set) var viewState: HomeViewStateEnum = .empty
     @Published var searchQuery = ""
     @Published var isConnected = true {
         didSet {
