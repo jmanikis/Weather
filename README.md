@@ -24,10 +24,11 @@ Weather Tracker is a simple iOS app built with SwiftUI that allows users to sear
 1. Clone the repository:
    ```bash
    git clone https://github.com/jmanikis/Weather.git
-  ```
+   ```
+  
 2. Navigate to project folder:
 
-   ```
+   ```bash
    cd Weather
    ```
 3. Open the project in Xcode:
