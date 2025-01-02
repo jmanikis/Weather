@@ -11,6 +11,7 @@ import SwiftUI
 class HomeViewModel: ObservableObject {
     let weatherManager = WeatherManager()
     let storageManager = StorageManager()
+    let networkManager = NetworkManager()
     
     @Published private(set) var viewState: HomeViewStateEnum = .empty
     @Published var searchQuery = ""
@@ -23,6 +24,25 @@ class HomeViewModel: ObservableObject {
             }
         }
     }
+    
+    init() {
+        setupNetworkMonitoring()
+    }
+    
+    deinit {
+        networkManager.stopMonitoring()
+    }
+    
+    private func setupNetworkMonitoring() {
+        networkManager.startMonitoring { [weak self] isConnected in
+            guard let self else { return }
+            self.isConnected = isConnected
+            if !isConnected {
+                self.viewState = .error(.networkError)
+            }
+        }
+    }
+    
 
     private func handleEmptySearch() async {
         if let savedCity = storageManager.getCity() {
