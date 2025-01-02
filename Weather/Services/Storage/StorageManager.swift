@@ -7,14 +7,13 @@
 
 import SwiftUI
 
-protocol StorageServiceProtocol {
+protocol StorageManagerProtocol {
     func saveCity(_ city: String)
     func getCity() -> String?
     func clearCity()
 }
 
-// MARK: - Storage Service
-class StorageManager: StorageServiceProtocol {
+class StorageManager: StorageManagerProtocol {
     private let defaults = UserDefaults.standard
     private let cityKey = "savedCity"
     

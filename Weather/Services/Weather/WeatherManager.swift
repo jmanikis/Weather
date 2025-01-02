@@ -8,11 +8,11 @@
 import Foundation
 
 // MARK: - Protocols
-protocol WeatherServiceProtocol {
+protocol WeatherManagerProtocol {
     func fetchWeather(cityName: String) async throws -> WeatherModel
 }
 
-actor WeatherManager: WeatherServiceProtocol {
+actor WeatherManager: WeatherManagerProtocol {
     private let apiKey = Constants.apiKey
     private let baseURL = URL(string: "https://api.weatherapi.com/v1/current.json")!
     

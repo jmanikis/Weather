@@ -9,9 +9,8 @@ import SwiftUI
 
 @MainActor
 class HomeViewModel: ObservableObject {
-    let weatherManager = WeatherManager()
-    let storageManager = StorageManager()
-    let networkManager = NetworkManager()
+
+    private let interactor: HomeProtocol
     
     @Published private(set) var viewState: HomeViewStateEnum = .empty
     @Published var searchQuery = ""
@@ -24,42 +23,42 @@ class HomeViewModel: ObservableObject {
             }
         }
     }
-    
-    init() {
+
+    init(interactor: HomeProtocol) {
+        self.interactor = interactor
         setupNetworkMonitoring()
     }
-    
+
     deinit {
-        networkManager.stopMonitoring()
+        interactor.stopMonitoring()
     }
-    
-    private func setupNetworkMonitoring() {
-        networkManager.startMonitoring { [weak self] isConnected in
-            guard let self else { return }
-            self.isConnected = isConnected
-            if !isConnected {
-                self.viewState = .error(.networkError)
-            }
-        }
-    }
-    
 
     private func handleEmptySearch() async {
-        if let savedCity = storageManager.getCity() {
+        if let savedCity = interactor.getCity() {
             await fetchWeather(for: savedCity, isSearch: false)
         } else {
             viewState = .empty
         }
     }
     
+    private func setupNetworkMonitoring() {
+        interactor.startMonitoring { [weak self] isConnected in
+            guard let self else { return }
+            self.isConnected = isConnected
+            if !isConnected {
+                self.viewState = .error(.invalidResponse)
+            }
+        }
+    }
+    
     func clearSavedCity() {
-        storageManager.clearCity()
+        interactor.clearCity()
         viewState = .empty
         searchQuery = ""
     }
     
     func loadSavedCity() async {
-        if let savedCity = storageManager.getCity(), !savedCity.isEmpty {
+        if let savedCity = interactor.getCity(), !savedCity.isEmpty {
             await fetchWeather(for: savedCity, isSearch: false)
         } else {
             viewState = .empty
@@ -85,7 +84,7 @@ class HomeViewModel: ObservableObject {
     func selectCity(_ weather: WeatherModel) {
         viewState = .currentWeather(weather)
         searchQuery = ""
-        storageManager.saveCity(weather.location.name)
+        interactor.saveCity(weather.location.name)
     }
     
     private func fetchWeather(for city: String, isSearch: Bool) async {
@@ -97,7 +96,7 @@ class HomeViewModel: ObservableObject {
         viewState = .loading
         
         do {
-            let weather = try await weatherManager.fetchWeather(cityName: city)
+            let weather = try await interactor.fetchWeather(cityName: city)
             if isSearch {
                 viewState = .searchResults(weather)
             } else {

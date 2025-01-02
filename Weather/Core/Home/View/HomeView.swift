@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject var viewModel = HomeViewModel()
+    @StateObject var viewModel: HomeViewModel
 
     var body: some View {
         VStack(spacing: 20) {
@@ -20,6 +20,7 @@ struct HomeView: View {
                     }
                 }
             )
+            .keyboardDismissable()
 
             contentView
         }
@@ -27,6 +28,7 @@ struct HomeView: View {
         .task {
             await viewModel.loadSavedCity()
         }
+
     }
 
     @ViewBuilder
@@ -67,5 +69,9 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(
+        viewModel: HomeViewModel(
+            interactor: HomeInteractor(container: MockDependencies.shared.container)
+        )
+    )
 }
