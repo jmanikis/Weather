@@ -8,13 +8,13 @@
 import Foundation
 import Network
 
-protocol NetworkManaging {
+protocol NetworkManagerProtocol {
     var isConnected: Bool { get }
     func startMonitoring(onStatusChange: @escaping (Bool) -> Void)
     func stopMonitoring()
 }
 
-class NetworkManager: NetworkManaging {
+class NetworkManager: NetworkManagerProtocol {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     
