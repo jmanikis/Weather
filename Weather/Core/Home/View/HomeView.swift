@@ -8,26 +8,61 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var searchText: String = ""
-    
-    let city = "Mock City"
-    
+    @StateObject var viewModel = HomeViewModel()
+
     var body: some View {
-        VStack {
-            SearchBarView(searchText: $searchText) {}
-            if !city.isEmpty {
-                WeatherState(weather: .mockData)
-            } else {
-                Group {
-                    VStack {
-                        Text("No City Selected")
-                        Text("Please search for a city")
+        VStack(spacing: 20) {
+            SearchBarView(
+                searchText: $viewModel.searchQuery,
+                onSubmit: {
+                    Task {
+                        await viewModel.handleSubmit()
                     }
                 }
-                .frame(maxHeight: .infinity, alignment: .center)
+            )
+
+            contentView
+        }
+        .padding(20)
+        .task {
+            await viewModel.loadSavedCity()
+        }
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        Group {
+            switch viewModel.viewState {
+            case .loading:
+                ProgressView()
+                    .frame(maxHeight: .infinity, alignment: .center)
+                
+            case .empty:
+                EmptyStateView()
+                    .frame(maxHeight: .infinity, alignment: .center)
+                
+            case .error(let error):
+                ErrorState(error: error)
+                    .frame(maxHeight: .infinity, alignment: .center)
+                
+            case .searchResults(let weather):
+                SearchResultCard(weather: weather) {
+                    viewModel.selectCity(weather)
+                }
+                .frame(maxHeight: .infinity, alignment: .top)
+                .transition(.opacity)
+                .padding(.vertical, 12)
+
+                if case .currentWeather(let currentWeather) = viewModel.viewState {
+                    WeatherState(weather: currentWeather)
+                }
+
+            case .currentWeather(let weather):
+                WeatherState(weather: weather)
+
             }
         }
-        .padding()
+        .animation(.smooth, value: viewModel.viewState)
     }
 }
 
