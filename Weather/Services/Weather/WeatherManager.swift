@@ -31,6 +31,10 @@ actor WeatherManager: WeatherServiceProtocol {
             URLQueryItem(name: "aqi", value: "no")
         ]
         
+        guard !apiKey.isEmpty, apiKey != "YOUR_API_KEY" else {
+            throw WeatherError.invalidAPIKey
+        }
+        
         guard let url = components.url else {
             throw WeatherError.invalidURL
         }

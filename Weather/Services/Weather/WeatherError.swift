@@ -13,6 +13,7 @@ enum WeatherError: LocalizedError {
     case invalidResponse
     case apiError(code: Int, message: String)
     case networkError
+    case invalidAPIKey
     
     var errorDescription: String {
         switch self {
@@ -26,6 +27,8 @@ enum WeatherError: LocalizedError {
             return message
         case .networkError:
             return "No network detected,\n check your network and"
+        case .invalidAPIKey:
+            return "Invalid API key.\n Make sure to modify it and"
         }
     }
 }
