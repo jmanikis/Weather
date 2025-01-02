@@ -7,6 +7,14 @@
 
 import SwiftUI
 
+enum WeatherViewState {
+    case loading
+    case empty
+    case error(WeatherError)
+    case searchResults(WeatherModel)
+    case currentWeather(WeatherModel)
+}
+
 struct WeatherState: View {
     let weather: WeatherModel
 

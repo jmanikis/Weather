@@ -8,16 +8,19 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var searchText: String = ""
-    
-    let city = "Mock City"
+    @StateObject var viewModel = HomeViewModel()
     
     var body: some View {
         VStack {
-            SearchBarView(searchText: $searchText) {}
-            if !city.isEmpty {
-                WeatherState(weather: .mockData)
-            } else {
+            SearchBarView(searchText: $viewModel.searchQuery) {
+                Task {
+                    await viewModel.handleSubmit()
+                }
+            }
+            switch viewModel.viewState {
+            case .loading:
+                ProgressView()
+            case .empty:
                 Group {
                     VStack {
                         Text("No City Selected")
@@ -25,9 +28,18 @@ struct HomeView: View {
                     }
                 }
                 .frame(maxHeight: .infinity, alignment: .center)
+            case .error(let weatherError):
+                Text("error: \(weatherError)")
+            case .searchResults(let weatherModel):
+                Text("Search results: \(weatherModel.location.name)")
+            case .currentWeather(let weatherModel):
+                WeatherState(weather: weatherModel)
             }
         }
         .padding()
+        .task {
+            await viewModel.loadSavedCity()
+        }
     }
 }
 
