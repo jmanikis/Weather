@@ -13,7 +13,13 @@ class HomeViewModel: ObservableObject {
     private let interactor: HomeProtocol
     
     @Published private(set) var viewState: HomeViewStateEnum = .empty
-    @Published var searchQuery = ""
+    @Published var searchQuery = "" {
+        didSet {
+            Task {
+                await handleAutoComplete()
+            }
+        }
+    }
     @Published var isConnected = true {
         didSet {
             if oldValue != isConnected {
@@ -35,7 +41,7 @@ class HomeViewModel: ObservableObject {
 
     private func handleEmptySearch() async {
         if let savedCity = interactor.getCity() {
-            await fetchWeather(for: savedCity, isSearch: false)
+            await fetchWeather(for: savedCity)
         } else {
             viewState = .empty
         }
@@ -59,7 +65,7 @@ class HomeViewModel: ObservableObject {
     
     func loadSavedCity() async {
         if let savedCity = interactor.getCity(), !savedCity.isEmpty {
-            await fetchWeather(for: savedCity, isSearch: false)
+            await fetchWeather(for: savedCity)
         } else {
             viewState = .empty
         }
@@ -70,7 +76,7 @@ class HomeViewModel: ObservableObject {
             await handleEmptySearch()
             return
         }
-        await fetchWeather(for: searchQuery, isSearch: true)
+        await fetchWeather(for: searchQuery)
     }
     
     func handleSubmit() async {
@@ -87,7 +93,7 @@ class HomeViewModel: ObservableObject {
         interactor.saveCity(weather.location.name)
     }
     
-    private func fetchWeather(for city: String, isSearch: Bool) async {
+    func fetchWeather(for city: String) async {
         guard isConnected else {
             viewState = .error(.networkError)
             return
@@ -97,13 +103,34 @@ class HomeViewModel: ObservableObject {
         
         do {
             let weather = try await interactor.fetchWeather(cityName: city)
-            if isSearch {
-                viewState = .searchResults(weather)
-            } else {
+//            if isSearch {
+//                viewState = .searchResults(weather)
+//            } else {
                 viewState = .currentWeather(weather)
-            }
+                interactor.saveCity(weather.location.name)
+//            }
         } catch let weatherError as WeatherError {
             viewState = .error(weatherError)
+        } catch {
+            viewState = .error(.invalidResponse)
+        }
+    }
+}
+
+extension HomeViewModel {
+    func handleAutoComplete() async {
+        guard !searchQuery.isEmpty else {
+            if let savedCity = interactor.getCity() {
+                await fetchWeather(for: savedCity)
+            } else {
+                viewState = .empty
+            }
+            return
+        }
+        
+        do {
+            let results = try await interactor.fetchAutoCompleteResults(query: searchQuery)
+            viewState = .autoCompleteResults(results)
         } catch {
             viewState = .error(.invalidResponse)
         }

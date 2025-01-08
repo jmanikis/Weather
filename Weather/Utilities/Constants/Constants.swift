@@ -8,5 +8,5 @@
 import SwiftUI
 
 struct Constants {
-    static let apiKey = "YOUR_API_KEY"
+    static let apiKey = "1a0e829802434e0fa4612335243112"
 }

@@ -7,6 +7,10 @@
 
 @MainActor
 class MockWeatherManager: WeatherManagerProtocol {
+    func fetchAutoCompleteResults(query: String) async throws -> [AutoCompleteResult] {
+        return []
+    }
+    
     // For testing purposes
     private(set) var fetchWeatherCalled = false
     private(set) var lastRequestedCity: String?

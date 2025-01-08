@@ -11,6 +11,7 @@ import SwiftUI
 protocol HomeProtocol {
     // MARK: Weather functions
     func fetchWeather(cityName: String) async throws -> WeatherModel
+    func fetchAutoCompleteResults(query: String) async throws -> [AutoCompleteResult]
     
     // MARK: Storage Functions
     func getCity() -> String?

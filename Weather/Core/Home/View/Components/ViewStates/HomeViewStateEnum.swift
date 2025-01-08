@@ -9,7 +9,7 @@ enum HomeViewStateEnum: Equatable {
     case loading
     case empty
     case error(WeatherError)
-    case searchResults(WeatherModel)
+    case autoCompleteResults([AutoCompleteResult])
     case currentWeather(WeatherModel)
 
     static func == (lhs: HomeViewStateEnum, rhs: HomeViewStateEnum) -> Bool {

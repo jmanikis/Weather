@@ -18,6 +18,9 @@ struct HomeInteractor: HomeProtocol {
         self.storageManager = container.resolve(StorageManager.self)!
         self.networkManager = container.resolve(NetworkManager.self)!
     }
+    func fetchAutoCompleteResults(query: String) async throws -> [AutoCompleteResult] {
+        try await weatherManager.fetchAutoCompleteResults(query: query)
+    }
 
     func fetchWeather(cityName: String) async throws -> WeatherModel {
         try await weatherManager.fetchWeather(cityName: cityName)

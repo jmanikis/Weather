@@ -32,40 +32,42 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    private var contentView: some View {
-        Group {
-            switch viewModel.viewState {
-            case .loading:
-                ProgressView()
-                    .frame(maxHeight: .infinity, alignment: .center)
-                
-            case .empty:
-                EmptyStateView()
-                    .frame(maxHeight: .infinity, alignment: .center)
-                
-            case .error(let error):
-                ErrorState(error: error)
-                    .frame(maxHeight: .infinity, alignment: .center)
-                
-            case .searchResults(let weather):
-                SearchResultCard(weather: weather) {
-                    viewModel.selectCity(weather)
+        private var contentView: some View {
+            Group {
+                switch viewModel.viewState {
+                case .loading:
+                    ProgressView()
+                        .frame(maxHeight: .infinity, alignment: .center)
+                    
+                case .empty:
+                    EmptyStateView()
+                        .frame(maxHeight: .infinity, alignment: .center)
+                    
+                case .error(let error):
+                    ErrorState(error: error)
+                        .frame(maxHeight: .infinity, alignment: .center)
+                    
+                case .autoCompleteResults(let results):
+                    ScrollView {
+                        VStack(spacing: 8) {
+                            ForEach(results) { result in
+                                SearchResultCard(autoCompleteResult: result) {
+                                    Task {
+                                        await viewModel.fetchWeather(for: result.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    
+                case .currentWeather(let weather):
+                    WeatherState(weather: weather)
+                        .frame(maxHeight: .infinity, alignment: .center)
                 }
-                .frame(maxHeight: .infinity, alignment: .top)
-                .transition(.opacity)
-                .padding(.vertical, 12)
-
-                if case .currentWeather(let currentWeather) = viewModel.viewState {
-                    WeatherState(weather: currentWeather)
-                }
-
-            case .currentWeather(let weather):
-                WeatherState(weather: weather)
-
             }
+            .animation(.smooth, value: viewModel.viewState)
         }
-        .animation(.smooth, value: viewModel.viewState)
-    }
 }
 
 #Preview {

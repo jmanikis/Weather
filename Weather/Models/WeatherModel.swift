@@ -13,6 +13,14 @@ struct WeatherModel: Codable {
     let current: Current
 }
 
+struct AutoCompleteResult: Codable, Identifiable {
+    let id: Int
+    let name, region, country: String
+    let lat, lon: Double
+    let url: String
+}
+
+
 // MARK: - Location
 struct Location: Codable {
     let name: String
